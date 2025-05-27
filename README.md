@@ -1,82 +1,93 @@
-# Medical Image Processing Project: CT Analysis and Segmentation
+# Medical Image Processing Project: CT Analysis, Segmentation, and Registration
 
 ## Overview
 
-This project focuses on processing and analyzing abdominal CT scans and associated segmentations, specifically targeting liver and tumor regions. The primary goal is to implement and evaluate techniques for DICOM data handling, 3D visualization, and semi-automatic image segmentation.
+This project focuses on processing and analyzing abdominal CT scans and associated segmentations, specifically targeting liver and tumor regions. The primary goals are to implement and evaluate techniques for DICOM data handling, 3D visualization, semi-automatic image segmentation, and 3D rigid coregistration.
 
 This repository contains implementations for the following objectives:
 
-1.  **DICOM Loading and Visualization:** Loading CT series and segmentations, spatial ordering based on DICOM headers, and generating 3D visualizations like Maximum Intensity Projections (MIPs).
-2.  **3D Image Segmentation:** Developing and evaluating a semi-automatic algorithm to segment tumor regions based on limited initial information (centroid).
+1. **DICOM Loading and Visualization:**  
+   Loading CT series and segmentations, spatial ordering based on DICOM headers, and generating 3D visualizations such as rotating Maximum Intensity Projections (MIPs) with tumor mask overlays.
 
-*(Note: Objective 3, manual 3D rigid coregistration, may be implemented later on.)*
+2. **3D Image Segmentation:**  
+   Developing and evaluating a semi-automatic 3D region growing algorithm to segment tumor regions based on limited initial information (centroid), including quantitative and qualitative assessment.
+
+3. **3D Rigid Coregistration:**  
+   Manual implementation of a rigid registration pipeline aligning an input CT volume to a reference volume using landmark initialization, optimization of rotation and translation parameters, and validation through numerical metrics and visual overlays.
 
 ## Features Implemented
 
-* **DICOM Data Handling:**
-    * Loads CT image series from a directory using `pydicom`.
-    * Loads DICOM Segmentation objects using `pydicom` and `highdicom`.
-    * Sorts CT slices based on `ImagePositionPatient` for correct 3D volume assembly.
-    * Verifies consistency of `SeriesInstanceUID` and `AcquisitionNumber` (optional check) across CT slices.
-    * Maps segmentation frames to corresponding CT slices using spatial information from headers.
-* **Visualization:**
-    * Displays 2D axial slices of the CT volume with optional segmentation overlays (Liver, Tumor) using `matplotlib`.
-    * Applies CT windowing (`apply_window` function) for optimal contrast.
-    * Generates rotating Maximum Intensity Projection (MIP) animations (`create_mip_animation` function) showing Axial, Coronal, and Sagittal views of the CT volume with tumor mask overlay.
-* **Segmentation (Objective 2):**
-    * Calculates the 3D bounding box and centroid of a ground truth tumor mask.
-    * Implements a semi-automatic 3D region growing segmentation algorithm using `SimpleITK`, seeded by the tumor centroid.
-    * Includes optional pre-processing (Gaussian smoothing) and post-processing (largest connected component, morphological closing) steps.
-* **Evaluation (Objective 2):**
-    * Calculates numerical segmentation performance metrics: Dice Similarity Coefficient (DSC), Precision, Sensitivity (Recall), Specificity, F1-score.
-    * Provides visual comparison plots showing ground truth vs. segmented contours on representative CT slices.
-* **Registration (Objective 3 - To be implemented):**
-    * Manual implementation of 3D rigid transformation model (rotation, translation matrices).
-    * Manual implementation of Trilinear Interpolation.
-    * Manual implementation of Sum of Squared Differences (SSD) similarity metric.
-    * Basic Coordinate Descent optimizer to find registration parameters.
-    * Resampling function to apply the transformation.
-    * Visualization of registration results (side-by-side slices, checkerboard).
+* **DICOM Data Handling:**  
+    * Loads CT image series and segmentation masks from directories using `pydicom` and `highdicom`.  
+    * Sorts CT slices and segmentation frames based on spatial headers (`ImagePositionPatient`) for accurate 3D volume reconstruction.  
+    * Ensures spatial alignment between CT volumes and segmentation masks by matching voxel dimensions, orientation, and origin.
+
+* **Visualization:**  
+    * Displays 2D axial, sagittal, and coronal slices with segmentation overlays (Liver, Tumor) using `matplotlib`.  
+    * Applies CT windowing functions for optimized contrast visualization.  
+    * Generates animated rotating Maximum Intensity Projection (MIP) GIFs showing tumor localization in 3D.
+
+* **Segmentation (Objective 2):**  
+    * Computes 3D bounding box and centroid of the ground truth tumor mask.  
+    * Implements a semi-automatic seeded region growing segmentation algorithm in 3D using `SimpleITK`.  
+    * Applies preprocessing (Gaussian smoothing) and postprocessing (largest connected component extraction, morphological closing) to refine segmentation.  
+    * Evaluates segmentation accuracy with Dice Similarity Coefficient (DSC), Precision, Sensitivity (Recall), Specificity, and F1-score.  
+    * Provides visual comparison plots between ground truth and segmented masks on representative slices.
+
+* **Registration (Objective 3):**  
+    * Manually implements 3D rigid transformation including rotation (via quaternion) and translation parameters.  
+    * Performs landmark-based initialization followed by optimization of parameters using a grid-search optimizer minimizing a normalized mutual information based loss.  
+    * Applies trilinear interpolation for volume resampling under transformation.  
+    * Validates registration accuracy through multiple quantitative metrics (Correlation coefficient, Normalized Mutual Information, Mean Squared Error) and visual overlay of transformed liver segmentation masks.
 
 ## Setup and Installation
 
-1.  **Clone the repository:**
+1. **Clone the repository:**
     ```bash
-    git clone <your-repository-url>
-    cd <repository-directory>
+    git clone https://github.com/abdulaihalidu/Medical-Image-Processing.git
+    cd 'Medical Image Processing'
     ```
-2.  **Create a virtual environment (recommended):**
+2. **Create a virtual environment (recommended):**
     ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows use `venv\Scripts\activate`
     ```
-3.  **Install dependencies:**
+3. **Install dependencies:**
     ```bash
     pip install -r requirements.txt
     ```
-    *(Ensure `requirements.txt` lists all necessary libraries: `numpy`, `pydicom`, `matplotlib`, `scipy`, `imageio`, `highdicom`, `SimpleITK`)*
+    *(Ensure `requirements.txt` includes all necessary libraries such as `numpy`, `pydicom`, `matplotlib`, `scipy`, `imageio`, `highdicom`, `SimpleITK`.)*
 
 ## Usage
 
-1.  **Configure Paths:** Open the main script (.ipynb file) and update the placeholder paths for your CT directory and segmentation files:
-    * `ct_directory`
-    * `liver_seg_file`
-    * `tumor_seg_file`
-    * `input_ct_volume` (for Objective 3, if applicable)
-    * `output_dir` / `output_gif_path` (for saving results)
-2.  **Run the Script:** Run the Jupyter Notebook cells sequentially
-3.  **Outputs:** The script will print progress and results to the output cells. Visualizations (plots, MIP GIF) will be displayed or saved to the specified output directory.
+1. **Configure Paths:** Update the paths in the Jupyter Notebook for your dataset and output locations:  
+    - `ct_directory`  
+    - `liver_seg_file`  
+    - `tumor_seg_file`  
+    - `input_ct_volume` (for registration)  
+    - `output_dir` / `output_gif_path`  
+2. **Run the Notebook:** Execute cells sequentially to perform loading, visualization, segmentation, and registration.  
+3. **Outputs:** Results include printed metrics, figures, and saved visualization files such as MIP animations and overlay images.
 
 ## Configuration Notes
 
-* **Segmentation Parameters:** For Objective 2, key parameters within the script might need tuning for optimal results on different datasets:
-    * `intensity_tolerance` (for region growing)
-    * Gaussian smoothing `sigma`
-    * Morphological closing radius
-* **Registration Parameters (To be Implemented):** For Objective 3, optimization parameters might need adjustment:
-    * `iterations`
-    * `step_sizes`
-    * `sampling_step`
-    * Similarity metric (`calculate_ssd` or potentially others)
+* **Segmentation Parameters:**  
+    * `intensity_tolerance` — defines intensity window around seed voxel for region growing  
+    * Gaussian smoothing `sigma` for noise reduction  
+    * Morphological closing kernel size for mask refinement
 
+* **Registration Parameters:**  
+    * Number of iterations and step sizes for optimizer  
+    * Sampling step for grid search  
+    * Similarity metric configuration (Normalized Mutual Information)
 
+## Repository Structure
+
+- `notebook.ipynb` — Main Jupyter Notebook containing the full workflow and code  
+- `requirements.txt` — List of required Python packages  
+- `Data/` — Directory containing the DICOM data files  
+- `README.md` — Project overview and instructions
+
+---
+
+This project demonstrates end-to-end medical image analysis workflows, emphasizing practical implementation, quantitative validation, and clear visualization, serving as a solid foundation for further research or clinical application development.
