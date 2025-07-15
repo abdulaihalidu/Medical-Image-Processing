@@ -82,12 +82,12 @@ This repository contains implementations for the following objectives:
     * Similarity metric configuration (Normalized Mutual Information)
 
 ## Repository Structure
-
+```
 - `notebook.ipynb` — Main Jupyter Notebook containing the full workflow and code  
 - `requirements.txt` — List of required Python packages  
 - `Data/` — Directory containing the DICOM data files  
 - `README.md` — Project overview and instructions
-
+```
 ---
 
 This project demonstrates end-to-end medical image analysis workflows, emphasizing practical implementation, quantitative validation, and clear visualization, serving as a solid foundation for further research or clinical application development.
